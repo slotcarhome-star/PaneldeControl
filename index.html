@@ -3,95 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KronoPanel - Gestión</title>
+    <title>KronoMaster - Control Total</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Iconos -->
+    <!-- Iconos FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; font-family: sans-serif; color: #e2e8f0; }
-        .glass { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        body { background-color: #0f172a; font-family: system-ui, -apple-system, sans-serif; color: #e2e8f0; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        /* Animación para cuando se borra algo */
-        .deleting { opacity: 0.5; pointer-events: none; transform: scale(0.95); transition: all 0.2s; }
+        
+        .nav-btn { @apply px-4 py-2 rounded-lg text-sm font-bold text-slate-400 border border-slate-700 transition-all flex items-center gap-2 hover:bg-slate-800 hover:text-white; }
+        .nav-btn.active { @apply text-white border-transparent shadow-lg transform scale-105; }
+        
+        .nav-btn.active[data-color="blue"] { background-color: #2563eb; }
+        .nav-btn.active[data-color="emerald"] { background-color: #059669; }
+        .nav-btn.active[data-color="purple"] { background-color: #7c3aed; }
     </style>
 </head>
-<body class="pb-20 min-h-screen">
+<body class="min-h-screen pb-20 selection:bg-indigo-500 selection:text-white">
 
     <!-- CABECERA -->
-    <header class="bg-slate-800 border-b border-slate-700 p-4 sticky top-0 z-50 shadow-lg">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
+    <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 p-4 sticky top-0 z-50 shadow-2xl">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            
             <div class="flex items-center gap-3">
-                <div class="bg-blue-600 p-2 rounded-lg shadow-lg">
-                    <i class="fas fa-tasks text-white text-xl"></i>
+                <div class="bg-gradient-to-tr from-indigo-600 to-violet-600 p-2.5 rounded-xl shadow-lg">
+                    <i class="fas fa-network-wired text-white text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-white tracking-wider">Krono<span class="text-emerald-400">Panel</span></h1>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase">Gestión V4 (Botón Borrar Fixed)</p>
+                    <h1 class="text-xl font-bold text-white tracking-wide">Krono<span class="text-indigo-400">Master</span></h1>
+                    <div class="flex items-center gap-2">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">DB: correo-95e58</p>
+                    </div>
                 </div>
             </div>
-            <div id="status" class="text-xs font-mono text-emerald-500 animate-pulse">
-                <i class="fas fa-circle text-[8px] mr-1"></i>Conectado
+
+            <!-- BOTONES SUPERIORES (TUS 3 APPS) -->
+            <div class="flex bg-slate-800/50 p-1.5 rounded-xl border border-slate-700/50 w-full md:w-auto overflow-x-auto gap-2 backdrop-blur-sm">
+                <button onclick="switchApp(0)" id="btn-app-0" class="nav-btn active" data-color="blue">
+                    <i class="fas fa-stopwatch"></i> KronoPersonal <span class="bg-black/20 px-1.5 rounded text-[10px] opacity-70">2€</span>
+                </button>
+                <button onclick="switchApp(1)" id="btn-app-1" class="nav-btn" data-color="emerald">
+                    <i class="fas fa-road"></i> KronoDual <span class="bg-black/20 px-1.5 rounded text-[10px] opacity-70">5€</span>
+                </button>
+                <button onclick="switchApp(2)" id="btn-app-2" class="nav-btn" data-color="purple">
+                    <i class="fas fa-search"></i> BuscaSlot <span class="bg-black/20 px-1.5 rounded text-[10px] opacity-70">1€</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto p-4 space-y-6">
+    <main class="max-w-5xl mx-auto p-4 md:p-8">
 
-        <!-- BOTONES DE PESTAÑA -->
-        <div class="flex bg-slate-800 p-1.5 rounded-xl border border-slate-700 shadow-inner">
-            <button onclick="setTab('work')" id="tab-work" class="flex-1 py-3 rounded-lg font-bold text-sm bg-blue-600 text-white shadow-lg transition-all flex flex-col items-center justify-center gap-1">
-                <span class="flex items-center gap-2"><i class="fas fa-clipboard-list"></i> 1. GESTIÓN PEDIDOS (<span id="count-leads">0</span>)</span>
-                <span class="text-[10px] opacity-70 font-normal">Tu libreta de trabajo</span>
-            </button>
-            <button onclick="setTab('data')" id="tab-data" class="flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 hover:text-white hover:bg-slate-700 transition-all flex flex-col items-center justify-center gap-1">
-                <span class="flex items-center gap-2"><i class="fas fa-database"></i> 2. BASE DE DATOS (<span id="count-licenses">0</span>)</span>
-                <span class="text-[10px] opacity-70 font-normal">Licencias activas reales</span>
-            </button>
-        </div>
-
-        <!-- ================= PESTAÑA 1: PEDIDOS (TU LIBRETA) ================= -->
-        <div id="view-work" class="space-y-6 fade-in">
+        <!-- PANEL DE CONTROL -->
+        <div id="main-panel" class="fade-in space-y-8">
             
-            <!-- CAJA NUEVO CORREO -->
-            <div class="bg-slate-800 border-l-4 border-blue-500 p-6 rounded-r-xl shadow-lg flex flex-col md:flex-row gap-4 items-end">
-                <div class="flex-1 w-full">
-                    <label class="text-xs font-bold text-blue-400 uppercase mb-2 block">
-                       <i class="fas fa-envelope-open-text mr-1"></i> Registrar Nuevo Correo
-                    </label>
-                    <input type="email" id="input-email" placeholder="cliente@ejemplo.com" 
-                        class="w-full bg-slate-900 border border-slate-600 text-white p-3 rounded-lg outline-none focus:border-blue-500 transition-colors">
+            <!-- INFO APP ACTUAL -->
+            <div class="flex flex-col md:flex-row justify-between items-end border-b border-slate-800 pb-6 gap-4">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <h2 id="current-app-name" class="text-4xl font-bold text-white tracking-tight">Cargando...</h2>
+                        <span id="current-app-badge" class="px-2 py-1 rounded text-xs font-bold uppercase bg-slate-800 text-slate-400">APP ACTIVA</span>
+                    </div>
+                    <p class="text-sm text-slate-400 font-mono flex items-center gap-2">
+                        <i class="fas fa-folder-open text-slate-600"></i> ID Carpeta: <span id="current-app-id" class="text-white font-bold bg-slate-800 px-2 rounded">...</span>
+                    </p>
                 </div>
-                <button onclick="addLead()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg w-full md:w-auto active:scale-95 transition-transform">
-                    GUARDAR
+                
+                <!-- CONTADORES -->
+                <div class="flex gap-4">
+                    <div class="text-right px-4 border-r border-slate-800">
+                        <div class="text-2xl font-bold text-white" id="stat-leads">0</div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase">Pendientes</div>
+                    </div>
+                    <div class="text-right px-2">
+                        <div class="text-2xl font-bold text-white" id="stat-licenses">0</div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase">Activos</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABS GRANDES (CORREOS VS LICENCIAS) -->
+            <div class="grid grid-cols-2 gap-4 md:gap-6">
+                <button onclick="setInternalTab('work')" id="int-tab-work" class="relative overflow-hidden p-6 rounded-2xl text-left border transition-all duration-300 group">
+                    <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-500">
+                        <i class="fas fa-envelope-open-text text-7xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-sm font-bold opacity-70 mb-1">GESTIÓN DE CORREOS</p>
+                        <h3 class="text-xl md:text-2xl font-bold">Pedidos Pendientes</h3>
+                    </div>
+                </button>
+
+                <button onclick="setInternalTab('data')" id="int-tab-data" class="relative overflow-hidden p-6 rounded-2xl text-left border transition-all duration-300 group bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-750 hover:text-white">
+                    <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-500">
+                        <i class="fas fa-database text-7xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="text-sm font-bold opacity-70 mb-1">BASE DE DATOS</p>
+                        <h3 class="text-xl md:text-2xl font-bold">Licencias Activas</h3>
+                    </div>
                 </button>
             </div>
 
-            <!-- LISTA -->
-            <div id="leads-container" class="space-y-4"></div>
-        </div>
-
-        <!-- ================= PESTAÑA 2: DATOS REALES (PELIGRO) ================= -->
-        <div id="view-data" class="space-y-6 hidden fade-in">
-            <div class="bg-emerald-900/10 border border-emerald-500/20 p-4 rounded-xl flex gap-3 items-center">
-                <i class="fas fa-server text-emerald-500 text-2xl"></i>
-                <div>
-                    <p class="text-emerald-400 font-bold text-sm uppercase">Licencias Activas</p>
-                    <p class="text-xs text-slate-400">Si borras aquí, el usuario pierde el acceso inmediatamente.</p>
+            <!-- VISTA 1: TRABAJO (CORREOS) -->
+            <div id="view-work" class="space-y-6 fade-in">
+                
+                <!-- CAJA REGISTRO MANUAL -->
+                <div class="bg-slate-800 border-l-4 p-6 rounded-r-xl shadow-xl flex flex-col md:flex-row gap-4 items-end transition-colors" id="box-new-lead">
+                    <div class="flex-1 w-full">
+                        <label class="text-xs font-bold uppercase mb-2 block flex items-center gap-2" id="lbl-new-lead">
+                           <i class="fas fa-plus-circle"></i> Registrar Nuevo Interesado Manualmente
+                        </label>
+                        <div class="relative">
+                            <i class="fas fa-envelope absolute left-3 top-3.5 text-slate-500"></i>
+                            <input type="email" id="input-email" placeholder="cliente@ejemplo.com" 
+                                class="w-full bg-slate-900 border border-slate-600 rounded-lg py-3 pl-10 pr-4 text-white focus:border-white focus:ring-0 outline-none transition-colors">
+                        </div>
+                    </div>
+                    <button onclick="addLead()" id="btn-save-lead" class="w-full md:w-auto font-bold py-3 px-8 rounded-lg shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform text-white">
+                        GUARDAR
+                    </button>
                 </div>
+
+                <!-- LISTA PEDIDOS -->
+                <div id="leads-container" class="space-y-4 min-h-[200px]"></div>
             </div>
-            <div id="licenses-container" class="space-y-3 bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-xl"></div>
+
+            <!-- VISTA 2: BASE DE DATOS (LICENCIAS) -->
+            <div id="view-data" class="hidden space-y-6 fade-in">
+                <div class="bg-emerald-900/10 border border-emerald-500/20 p-4 rounded-xl flex items-start gap-4">
+                    <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-500">
+                        <i class="fas fa-check-circle text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-emerald-400 font-bold text-sm uppercase">Licencias en Vigor</h4>
+                        <p class="text-sm text-slate-400 mt-1">
+                            Esta es la lista real. Si un usuario está aquí, puede entrar. Si lo borras, pierde el acceso.
+                        </p>
+                    </div>
+                </div>
+                <div id="licenses-container" class="space-y-3 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 shadow-inner min-h-[200px]"></div>
+            </div>
+
         </div>
 
     </main>
 
-    <!-- SCRIPTS -->
+    <!-- LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // TUS DATOS REALES
+        // 1. CONEXIÓN A TU BASE DE DATOS ÚNICA
         const firebaseConfig = {
             apiKey: "AIzaSyDW-2Yc4kvZJYbNOVeesPZWdRThYe0noUI",
             authDomain: "correo-95e58.firebaseapp.com",
@@ -104,187 +173,220 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const APP_ID = "app_krono"; 
 
-        let leadsData = [];
-        let licensesData = [];
+        // 2. TUS 3 APLICACIONES CONFIGURADAS
+        const apps = [
+            { 
+                name: "KronoPersonal", 
+                id: "app_krono", 
+                price: "2€", 
+                color: "blue", 
+                colorHex: "#2563eb"
+            },
+            { 
+                name: "KronoDual", 
+                id: "app_kronodual", 
+                price: "5€", 
+                color: "emerald", 
+                colorHex: "#059669"
+            },
+            { 
+                name: "BuscaSlot", 
+                id: "app_buscaslot", 
+                price: "1€", 
+                color: "purple", 
+                colorHex: "#7c3aed"
+            }
+        ];
 
-        // --- FUNCIONES UI (PESTAÑAS) ---
-        window.setTab = (tab) => {
-            document.getElementById('view-work').classList.toggle('hidden', tab !== 'work');
-            document.getElementById('view-data').classList.toggle('hidden', tab !== 'data');
+        let currentAppIndex = 0;
+        let leads = [];
+        let licenses = [];
+        let unsubLeads = null;
+        let unsubLicenses = null;
+
+        window.onload = () => switchApp(0);
+
+        // CAMBIO DE APP
+        window.switchApp = (idx) => {
+            currentAppIndex = idx;
+            const currentApp = apps[idx];
+
+            document.querySelectorAll('.nav-btn').forEach((btn, i) => {
+                if(i === idx) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+
+            document.getElementById('current-app-name').innerText = currentApp.name;
+            document.getElementById('current-app-name').className = `text-4xl font-bold tracking-tight mb-1 text-${currentApp.color}-400`;
+            document.getElementById('current-app-id').innerText = currentApp.id;
             
-            const btnWork = document.getElementById('tab-work');
-            const btnData = document.getElementById('tab-data');
+            updateInternalTabStyles('work');
+            loadData(currentApp.id);
+        };
+
+        function loadData(appId) {
+            document.getElementById('leads-container').innerHTML = '<div class="text-center py-10 opacity-50"><i class="fas fa-circle-notch fa-spin"></i> Cargando...</div>';
+            document.getElementById('licenses-container').innerHTML = '<div class="text-center py-10 opacity-50"><i class="fas fa-circle-notch fa-spin"></i> Cargando...</div>';
+            
+            if(unsubLeads) unsubLeads();
+            if(unsubLicenses) unsubLicenses();
+
+            // Cargar Pedidos
+            const q1 = query(collection(db, 'artifacts', appId, 'public', 'data', 'krono_leads'));
+            unsubLeads = onSnapshot(q1, s => {
+                leads = s.docs.map(d => ({id:d.id, ...d.data()}));
+                leads.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+                document.getElementById('stat-leads').innerText = leads.length;
+                document.getElementById('count-leads').innerText = leads.length;
+                renderLeads();
+            });
+
+            // Cargar Licencias
+            const q2 = query(collection(db, 'artifacts', appId, 'public', 'data', 'access_codes'));
+            unsubLicenses = onSnapshot(q2, s => {
+                licenses = s.docs.map(d => ({id:d.id, ...d.data()}));
+                document.getElementById('stat-licenses').innerText = licenses.length;
+                document.getElementById('count-licenses').innerText = licenses.length;
+                renderLicenses();
+            });
+        }
+
+        // TABS INTERNOS
+        window.setInternalTab = (tab) => {
+            const w = document.getElementById('view-work');
+            const d = document.getElementById('view-data');
             
             if(tab === 'work') {
-                btnWork.className = "flex-1 py-3 rounded-lg font-bold text-sm bg-blue-600 text-white shadow-lg transition-all flex flex-col items-center justify-center gap-1";
-                btnData.className = "flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 hover:text-white hover:bg-slate-700 transition-all flex flex-col items-center justify-center gap-1";
+                w.classList.remove('hidden'); d.classList.add('hidden');
+                updateInternalTabStyles('work');
             } else {
-                btnWork.className = "flex-1 py-3 rounded-lg font-bold text-sm text-slate-400 hover:text-white hover:bg-slate-700 transition-all flex flex-col items-center justify-center gap-1";
-                btnData.className = "flex-1 py-3 rounded-lg font-bold text-sm bg-emerald-600 text-white shadow-lg transition-all flex flex-col items-center justify-center gap-1";
+                w.classList.add('hidden'); d.classList.remove('hidden');
+                updateInternalTabStyles('data');
             }
         };
 
-        // --- FUNCIONES LÓGICAS (CONECTADAS A WINDOW PARA QUE NO FALLEN) ---
-        
-        // 1. Añadir Correo
+        function updateInternalTabStyles(activeTab) {
+            const appColor = apps[currentAppIndex].color;
+            const tabW = document.getElementById('int-tab-work');
+            const tabD = document.getElementById('int-tab-data');
+            const boxNew = document.getElementById('box-new-lead');
+            const btnSave = document.getElementById('btn-save-lead');
+            const lblNew = document.getElementById('lbl-new-lead');
+
+            if(activeTab === 'work') {
+                tabW.className = `bg-${appColor}-600 text-white p-6 rounded-2xl shadow-lg shadow-${appColor}-900/20 text-left relative overflow-hidden transform scale-[1.02] transition-all border border-${appColor}-400`;
+                tabD.className = "bg-slate-800 text-slate-400 p-6 rounded-2xl shadow border border-slate-700 hover:bg-slate-750 hover:text-white transition-all text-left relative overflow-hidden group";
+                
+                boxNew.className = `bg-slate-800 border-l-4 border-${appColor}-500 p-6 rounded-r-xl shadow-xl flex flex-col md:flex-row gap-4 items-end transition-colors`;
+                btnSave.className = `w-full md:w-auto bg-${appColor}-600 hover:bg-${appColor}-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform`;
+                lblNew.className = `text-xs font-bold text-${appColor}-400 uppercase mb-2 block flex items-center gap-2`;
+            } else {
+                tabW.className = "bg-slate-800 text-slate-400 p-6 rounded-2xl shadow border border-slate-700 hover:bg-slate-750 hover:text-white transition-all text-left relative overflow-hidden group";
+                tabD.className = "bg-emerald-600 text-white p-6 rounded-2xl shadow-lg shadow-emerald-900/20 text-left border border-emerald-400 relative overflow-hidden transform scale-[1.02] transition-all";
+            }
+        }
+
+        // ACCIONES
         window.addLead = async () => {
-            const input = document.getElementById('input-email');
-            const email = input.value.trim().toLowerCase();
-            if(!email) return alert("Por favor, escribe un correo.");
+            const email = document.getElementById('input-email').value.trim().toLowerCase();
+            if(!email) return alert("Escribe un correo.");
             try {
-                await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'krono_leads'), {
+                await addDoc(collection(db, 'artifacts', apps[currentAppIndex].id, 'public', 'data', 'krono_leads'), {
                     email: email, status: 'new', createdAt: new Date().toISOString()
                 });
-                input.value = "";
-            } catch(e) { alert("Error al guardar: " + e.message); }
+                document.getElementById('input-email').value = "";
+            } catch(e) { alert(e.message); }
         };
 
-        // 2. Borrar NOTA (El que fallaba)
-        window.deleteLead = async (id) => {
-            // Confirmación simple
-            if(!confirm("¿Borrar esta nota de la lista?")) return;
-
-            // Efecto visual inmediato para que veas que funciona
-            const card = document.getElementById(`card-${id}`);
-            if(card) card.classList.add('deleting');
-
-            try {
-                await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'krono_leads', id));
-                // No hace falta hacer nada más, Firebase actualizará la lista solo
-            } catch(e) {
-                alert("Error al borrar: " + e.message);
-                if(card) card.classList.remove('deleting'); // Si falla, quitamos el efecto
-            }
+        window.del = async (col, id, msg) => {
+            if(confirm(msg)) await deleteDoc(doc(db, 'artifacts', apps[currentAppIndex].id, 'public', 'data', col, id));
         };
 
-        // 3. Borrar LICENCIA REAL
-        window.deleteLicense = async (id) => {
-            if(confirm("¡PELIGRO! ¿Estás seguro de borrar este acceso? El cliente dejará de poder entrar.")) {
-                try {
-                    await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'access_codes', id));
-                } catch(e) { alert("Error al borrar: " + e.message); }
-            }
-        };
+        window.act = async (id, email) => {
+             const btn = document.getElementById(`btn-act-${id}`);
+             if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled=true; }
+             
+             const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+             let c = "";
+             for(let i=0; i<3; i++) c += chars.charAt(Math.floor(Math.random()*chars.length));
+             c += "-";
+             for(let i=0; i<3; i++) c += chars.charAt(Math.floor(Math.random()*chars.length));
 
-        // 4. Activar / Generar Clave
-        window.activate = async (id, email) => {
-            const btn = document.getElementById(`btn-act-${id}`);
-            if(btn) { btn.innerHTML = "Generando..."; btn.disabled = true; }
-
-            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-            let code = "";
-            for(let i=0; i<3; i++) code += chars.charAt(Math.floor(Math.random()*chars.length));
-            code += "-";
-            for(let i=0; i<3; i++) code += chars.charAt(Math.floor(Math.random()*chars.length));
-
-            try {
-                // Crear licencia real
-                await addDoc(collection(db, 'artifacts', APP_ID, 'public', 'data', 'access_codes'), {
-                    email: email, code: code, active: true, createdAt: new Date().toISOString()
+             try {
+                await addDoc(collection(db, 'artifacts', apps[currentAppIndex].id, 'public', 'data', 'access_codes'), {
+                    email: email, code: c, active: true, createdAt: new Date().toISOString()
                 });
-                // Actualizar nota
-                await updateDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'krono_leads', id), {
-                    status: 'done', generatedCode: code
+                await updateDoc(doc(db, 'artifacts', apps[currentAppIndex].id, 'public', 'data', 'krono_leads', id), {
+                    status: 'done', generatedCode: c
                 });
-            } catch(e) { 
-                alert("Error al activar: " + e.message); 
-                if(btn) { btn.innerHTML = "INTENTAR DE NUEVO"; btn.disabled = false; }
-            }
+             } catch(e) { alert(e.message); if(btn) btn.disabled=false; }
         };
 
-        // --- RENDERIZADO (PINTAR EN PANTALLA) ---
+        // RENDERIZADO
         function renderLeads() {
             const container = document.getElementById('leads-container');
-            document.getElementById('count-leads').innerText = leadsData.length;
+            const app = apps[currentAppIndex];
 
-            if(leadsData.length===0) { container.innerHTML='<div class="text-center text-slate-500 py-10">Libreta vacía.</div>'; return; }
+            if(leads.length === 0) { 
+                container.innerHTML = `<div class="text-center py-16 bg-slate-800/30 rounded-2xl border border-dashed border-slate-700 text-slate-500">No hay correos pendientes.</div>`; 
+                return; 
+            }
 
-            container.innerHTML = leadsData.map(item => {
-                const isDone = item.status === 'done';
-                
-                const pendingBlock = `
-                    <div class="grid grid-cols-2 gap-3 mt-4">
-                        <a href="mailto:${item.email}?subject=Pago Licencia KronoPersonal&body=Hola,%0D%0A%0D%0APara finalizar la compra, por favor haz un Bizum de 2 EUR al 686 16 60 07.%0D%0A%0D%0AResponde a este correo con el comprobante." 
-                           target="_blank" class="bg-slate-700 hover:bg-slate-600 text-white py-3 rounded font-bold text-xs flex items-center justify-center gap-2 border border-slate-600 transition-colors">
-                           <i class="fas fa-envelope text-yellow-400"></i> 1. PEDIR PAGO
-                        </a>
-                        <button id="btn-act-${item.id}" onclick="activate('${item.id}', '${item.email}')" 
-                           class="bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/50 transition-colors">
-                           <i class="fas fa-bolt"></i> 2. GENERAR
-                        </button>
-                    </div>
-                `;
+            container.innerHTML = leads.map(l => {
+                const isDone = l.status === 'done';
+                const actsDone = `
+                    <div class="mt-4 bg-slate-900/50 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-3 border border-emerald-500/20">
+                         <div class="flex items-center gap-3">
+                            <span class="text-emerald-500 font-bold text-xs uppercase">Clave:</span>
+                            <code class="text-white font-mono text-lg tracking-widest">${l.generatedCode}</code>
+                         </div>
+                         <a href="mailto:${l.email}?subject=Licencia ${app.name}&body=Hola!%0D%0A%0D%0AAquí tienes tu clave de acceso para ${app.name}:%0D%0A%0D%0ACLAVE: ${l.generatedCode}%0D%0A%0D%0AGracias por tu compra!" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-bold text-xs shadow-lg transition-transform active:scale-95 w-full sm:w-auto text-center"><i class="fas fa-paper-plane mr-2"></i> ENVIAR AL CLIENTE</a>
+                    </div>`;
 
-                const doneBlock = `
-                    <div class="mt-4 bg-emerald-900/20 border border-emerald-500/20 rounded p-3 flex flex-col sm:flex-row justify-between items-center gap-3">
-                        <div class="text-center sm:text-left">
-                            <span class="text-emerald-500 text-[10px] font-bold uppercase block mb-1">Clave Lista</span>
-                            <code class="text-white font-mono font-bold bg-slate-900 px-3 py-1 rounded border border-emerald-500/30 tracking-widest">${item.generatedCode}</code>
-                        </div>
-                        <a href="mailto:${item.email}?subject=Tu Licencia Activada&body=Hola!%0D%0A%0D%0APago recibido. Aquí tienes tu acceso:%0D%0AUsuario: ${item.email}%0D%0AClave: ${item.generatedCode}%0D%0A%0D%0AEntra ya en la web. Gracias!" 
-                           target="_blank" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-bold text-xs shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2">
-                           <i class="fas fa-paper-plane"></i> ENVIAR AHORA
-                        </a>
-                    </div>
-                `;
+                const actsPending = `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                         <a href="mailto:${l.email}?subject=Pago ${app.name}&body=Hola,%0D%0A%0D%0APara obtener tu licencia de ${app.name}, por favor realiza un Bizum de ${app.price} al 686 16 60 07.%0D%0A%0D%0AResponde a este correo con el comprobante." target="_blank" class="bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-lg font-bold text-xs text-center border border-slate-600 transition-colors"><i class="fas fa-euro-sign text-yellow-400 mr-1"></i> 1. PEDIR PAGO (${app.price})</a>
+                         <button id="btn-act-${l.id}" onclick="act('${l.id}','${l.email}')" class="bg-${app.color}-600 hover:bg-${app.color}-500 text-white py-3 rounded-lg font-bold text-xs shadow-lg shadow-${app.color}-900/30 transition-colors"><i class="fas fa-bolt mr-1"></i> 2. GENERAR CLAVE</button>
+                    </div>`;
 
                 return `
-                    <div id="card-${item.id}" class="bg-slate-800 border border-slate-700 p-5 rounded-xl shadow-sm relative overflow-hidden group">
-                        <div class="flex justify-between items-start z-10 relative">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${isDone ? 'bg-emerald-500 text-white' : 'bg-slate-700 text-slate-400'}">
-                                    ${item.email.charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-white text-lg">${item.email}</h3>
-                                    <div class="text-xs text-slate-500">${new Date(item.createdAt).toLocaleDateString()}</div>
-                                </div>
+                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm hover:border-slate-600 transition-all group">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${isDone ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-slate-700 text-slate-400'}">${l.email.charAt(0).toUpperCase()}</div>
+                            <div>
+                                <h3 class="font-bold text-white text-lg">${l.email}</h3>
+                                <div class="text-xs text-slate-500 flex items-center gap-2"><i class="far fa-clock"></i> ${new Date(l.createdAt).toLocaleDateString()} ${isDone ? '<span class="text-emerald-500 font-bold">• COMPLETADO</span>' : '<span class="text-yellow-500 font-bold">• PENDIENTE</span>'}</div>
                             </div>
-                            <button onclick="deleteLead('${item.id}')" class="text-slate-500 hover:text-red-500 hover:bg-red-500/10 p-2 rounded transition-colors flex items-center gap-2 text-xs font-bold border border-transparent hover:border-red-500/30">
-                                <i class="fas fa-trash"></i> <span class="hidden sm:inline">BORRAR NOTA</span>
-                            </button>
                         </div>
-                        ${isDone ? doneBlock : pendingBlock}
+                        <button onclick="del('krono_leads','${l.id}','¿Borrar nota?')" class="text-slate-600 hover:text-red-500 p-2 rounded-lg hover:bg-red-500/10 transition-colors"><i class="fas fa-trash"></i></button>
                     </div>
-                `;
+                    ${isDone ? actsDone : actsPending}
+                </div>`;
             }).join('');
         }
 
         function renderLicenses() {
-            const container = document.getElementById('licenses-container');
-            document.getElementById('count-licenses').innerText = licensesData.length;
+             const container = document.getElementById('licenses-container');
+             if(licenses.length === 0) { container.innerHTML = `<div class="text-center py-16 opacity-50"><i class="fas fa-database text-4xl text-slate-600 mb-3"></i><p>No hay licencias activas.</p></div>`; return; }
 
-            if(licensesData.length===0) { container.innerHTML='<div class="text-center text-slate-500 py-10">Vacío.</div>'; return; }
-
-            container.innerHTML = licensesData.map(item => `
-                <div class="bg-slate-800 border-b border-slate-700 p-4 flex justify-between items-center hover:bg-slate-700/50 transition-colors last:border-0">
+             container.innerHTML = licenses.map(l => `
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center hover:bg-slate-700/50 transition-colors group">
                     <div>
-                        <div class="text-white font-bold">${item.email}</div>
-                        <div class="flex items-center gap-2 mt-1">
-                            <code class="text-emerald-400 text-xs font-mono">${item.code}</code>
-                            <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 rounded-full border border-emerald-500/30">ACTIVO</span>
-                        </div>
+                        <div class="font-bold text-white flex items-center gap-3">${l.email} <span class="bg-emerald-500/10 text-emerald-500 text-[10px] px-2 py-0.5 rounded border border-emerald-500/20 font-bold">ACTIVO</span></div>
+                        <div class="flex items-center gap-2 mt-1"><code class="text-emerald-400 text-xs font-mono bg-slate-900 px-2 py-1 rounded border border-slate-600 tracking-wider">${l.code}</code></div>
                     </div>
-                    <button onclick="deleteLicense('${item.id}')" class="bg-red-500/10 text-red-500 hover:bg-red-600 hover:text-white px-4 py-2 rounded text-xs font-bold transition-colors flex items-center gap-2">
-                        <i class="fas fa-trash-alt"></i> ELIMINAR ACCESO
-                    </button>
-                </div>
-            `).join('');
+                    <button onclick="del('access_codes','${l.id}','¡PELIGRO! ¿Borrar acceso?')" class="bg-red-500/10 text-red-500 px-3 py-2 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors flex items-center gap-2"><i class="fas fa-trash-alt"></i> BORRAR</button>
+                </div>`).join('');
         }
 
-        // --- LISTENERS ---
-        onSnapshot(query(collection(db, 'artifacts', APP_ID, 'public', 'data', 'krono_leads')), (s) => {
-            leadsData = s.docs.map(d=>({id:d.id, ...d.data()}));
-            leadsData.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
-            renderLeads();
-        });
-        onSnapshot(query(collection(db, 'artifacts', APP_ID, 'public', 'data', 'access_codes')), (s) => {
-            licensesData = s.docs.map(d=>({id:d.id, ...d.data()}));
-            renderLicenses();
-        });
-
+        // GLOBAL EXPORT
+        window.switchApp = switchApp;
+        window.setInternalTab = setInternalTab;
+        window.addLead = addLead;
+        window.del = del;
+        window.act = act;
     </script>
 </body>
 </html>
