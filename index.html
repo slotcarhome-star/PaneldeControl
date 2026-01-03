@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KronoMaster - Control Total</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Iconos FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background-color: #0f172a; font-family: system-ui, -apple-system, sans-serif; color: #e2e8f0; }
@@ -16,10 +14,9 @@
         .nav-btn { @apply px-4 py-2 rounded-lg text-sm font-bold text-slate-400 border border-slate-700 transition-all flex items-center gap-2 hover:bg-slate-800 hover:text-white whitespace-nowrap; }
         .nav-btn.active { @apply text-white border-transparent shadow-lg transform scale-105; }
         
-        /* Colores */
         .nav-btn.active[data-color="blue"] { background-color: #2563eb; }
         .nav-btn.active[data-color="emerald"] { background-color: #059669; }
-        .nav-btn.active[data-color="orange"] { background-color: #ea580c; } /* Nuevo para Tracks */
+        .nav-btn.active[data-color="orange"] { background-color: #ea580c; }
     </style>
 </head>
 <body class="min-h-screen pb-20 selection:bg-indigo-500 selection:text-white">
@@ -27,7 +24,6 @@
     <!-- CABECERA -->
     <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 p-4 sticky top-0 z-50 shadow-2xl">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            
             <div class="flex items-center gap-3">
                 <div class="bg-gradient-to-tr from-indigo-600 to-violet-600 p-2.5 rounded-xl shadow-lg">
                     <i class="fas fa-network-wired text-white text-xl"></i>
@@ -35,51 +31,45 @@
                 <div>
                     <h1 class="text-xl font-bold text-white tracking-wide">Krono<span class="text-indigo-400">Master</span></h1>
                     <div class="flex items-center gap-2">
-                        <span class="relative flex h-2 w-2">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        <span id="connection-status" class="relative flex h-2 w-2">
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                         </span>
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">DB: correo-95e58</p>
                     </div>
                 </div>
             </div>
 
-            <!-- BOTONES SUPERIORES (APPS) -->
             <div class="flex bg-slate-800/50 p-1.5 rounded-xl border border-slate-700/50 w-full md:w-auto overflow-x-auto gap-2 backdrop-blur-sm">
-                <!-- App 1 -->
                 <button onclick="switchApp(0)" id="btn-app-0" class="nav-btn active" data-color="blue">
                     <i class="fas fa-stopwatch"></i> KronoPersonal <span class="bg-black/20 px-1.5 rounded text-[10px] opacity-70">2€</span>
                 </button>
-                <!-- App 2 -->
                 <button onclick="switchApp(1)" id="btn-app-1" class="nav-btn" data-color="emerald">
                     <i class="fas fa-road"></i> KronoDual <span class="bg-black/20 px-1.5 rounded text-[10px] opacity-70">5€</span>
                 </button>
-                <!-- App 3 (NUEVA) -->
                 <button onclick="switchApp(2)" id="btn-app-2" class="nav-btn" data-color="orange">
-                    <i class="fas fa-tachometer-alt"></i> TRACKS & TELEMETRY <span class="bg-black/20 px-1.5 rounded text-[10px] opacity-70">1€</span>
+                    <i class="fas fa-tachometer-alt"></i> TRACKS & TELEMETRY <span class="bg-black/20 px-1.5 rounded text-[10px] opacity-70">15€</span>
                 </button>
             </div>
         </div>
     </header>
 
     <main class="max-w-5xl mx-auto p-4 md:p-8">
+        
+        <!-- CAJA DE ERRORES (Visible solo si hay fallo) -->
+        <div id="error-box" class="hidden bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-xl mb-6 text-sm font-mono"></div>
 
         <!-- PANEL DE CONTROL -->
         <div id="main-panel" class="fade-in space-y-8">
-            
-            <!-- INFO APP ACTUAL -->
             <div class="flex flex-col md:flex-row justify-between items-end border-b border-slate-800 pb-6 gap-4">
                 <div>
                     <div class="flex items-center gap-3 mb-2">
-                        <h2 id="current-app-name" class="text-4xl font-bold text-white tracking-tight">Cargando...</h2>
+                        <h2 id="current-app-name" class="text-4xl font-bold text-white tracking-tight">Iniciando...</h2>
                         <span id="current-app-badge" class="px-2 py-1 rounded text-xs font-bold uppercase bg-slate-800 text-slate-400">APP ACTIVA</span>
                     </div>
                     <p class="text-sm text-slate-400 font-mono flex items-center gap-2">
-                        <i class="fas fa-folder-open text-slate-600"></i> ID Carpeta: <span id="current-app-id" class="text-white font-bold bg-slate-800 px-2 rounded">...</span>
+                        <i class="fas fa-folder-open text-slate-600"></i> ID: <span id="current-app-id" class="text-white font-bold bg-slate-800 px-2 rounded">...</span>
                     </p>
                 </div>
-                
-                <!-- CONTADORES -->
                 <div class="flex gap-4">
                     <div class="text-right px-4 border-r border-slate-800">
                         <div class="text-2xl font-bold text-white" id="stat-leads">0</div>
@@ -92,7 +82,6 @@
                 </div>
             </div>
 
-            <!-- TABS GRANDES -->
             <div class="grid grid-cols-2 gap-4 md:gap-6">
                 <button onclick="setInternalTab('work')" id="int-tab-work" class="relative overflow-hidden p-6 rounded-2xl text-left border transition-all duration-300 group">
                     <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 group-hover:opacity-20 transition-all duration-500">
@@ -115,10 +104,7 @@
                 </button>
             </div>
 
-            <!-- VISTA 1: TRABAJO (CORREOS) -->
             <div id="view-work" class="space-y-6 fade-in">
-                
-                <!-- CAJA REGISTRO MANUAL -->
                 <div class="bg-slate-800 border-l-4 p-6 rounded-r-xl shadow-xl flex flex-col md:flex-row gap-4 items-end transition-colors" id="box-new-lead">
                     <div class="flex-1 w-full">
                         <label class="text-xs font-bold uppercase mb-2 block flex items-center gap-2" id="lbl-new-lead">
@@ -134,12 +120,9 @@
                         GUARDAR
                     </button>
                 </div>
-
-                <!-- LISTA PEDIDOS -->
                 <div id="leads-container" class="space-y-4 min-h-[200px]"></div>
             </div>
 
-            <!-- VISTA 2: BASE DE DATOS (LICENCIAS) -->
             <div id="view-data" class="hidden space-y-6 fade-in">
                 <div class="bg-emerald-900/10 border border-emerald-500/20 p-4 rounded-xl flex items-start gap-4">
                     <div class="p-3 bg-emerald-500/10 rounded-lg text-emerald-500">
@@ -147,24 +130,19 @@
                     </div>
                     <div>
                         <h4 class="text-emerald-400 font-bold text-sm uppercase">Licencias en Vigor</h4>
-                        <p class="text-sm text-slate-400 mt-1">
-                            Esta es la lista real. Si un usuario está aquí, puede entrar. Si lo borras, pierde el acceso.
-                        </p>
+                        <p class="text-sm text-slate-400 mt-1">Lista real de accesos permitidos. Borrar aquí elimina el acceso.</p>
                     </div>
                 </div>
                 <div id="licenses-container" class="space-y-3 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 shadow-inner min-h-[200px]"></div>
             </div>
-
         </div>
-
     </main>
 
-    <!-- LÓGICA -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // 1. CONEXIÓN (ORIGINAL)
         const firebaseConfig = {
             apiKey: "AIzaSyDW-2Yc4kvZJYbNOVeesPZWdRThYe0noUI",
             authDomain: "correo-95e58.firebaseapp.com",
@@ -177,13 +155,14 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
-        // 2. TUS 3 APLICACIONES CONFIGURADAS (ACTUALIZADO)
+        // --- CONFIGURACIÓN DE APPS CORREGIDA ---
         const apps = [
             { 
                 name: "KronoPersonal", 
-                id: "app_krono", 
-                price: "2€", 
+                id: "app_krono",  // <--- CORREGIDO: app_krono
+                price: "Consultar", 
                 color: "blue", 
                 colorHex: "#2563eb"
             },
@@ -194,12 +173,11 @@
                 color: "emerald", 
                 colorHex: "#059669"
             },
-            // NUEVA APP AQUÍ
             { 
                 name: "TRACKS & TELEMETRY", 
-                id: "app_tracks",  // ID ACTUALIZADO
-                price: "1€", 
-                color: "orange",   // COLOR NUEVO
+                id: "app_tracks", 
+                price: "15€", 
+                color: "orange", 
                 colorHex: "#ea580c"
             }
         ];
@@ -210,9 +188,25 @@
         let unsubLeads = null;
         let unsubLicenses = null;
 
-        window.onload = () => switchApp(0);
+        // INICIO SEGURO
+        window.onload = async () => {
+            try {
+                console.log("Intentando conectar...");
+                await signInAnonymously(auth);
+                
+                // Indicador visual de conexión OK
+                const statusDot = document.getElementById('connection-status');
+                if(statusDot) statusDot.innerHTML = '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>';
+                
+                // Cargar App 0 (KronoPersonal/app_krono) por defecto
+                switchApp(0);
+            } catch (error) {
+                console.error("Error Auth:", error);
+                document.getElementById('error-box').classList.remove('hidden');
+                document.getElementById('error-box').innerText = "ERROR DE CONEXIÓN: " + error.message + ". Verifica que has actualizado las reglas de Firebase.";
+            }
+        };
 
-        // CAMBIO DE APP
         window.switchApp = (idx) => {
             currentAppIndex = idx;
             const currentApp = apps[idx];
@@ -239,47 +233,46 @@
             const leadsCont = document.getElementById('leads-container');
             const licCont = document.getElementById('licenses-container');
 
-            if(leadsCont) leadsCont.innerHTML = '<div class="text-center py-10 opacity-50"><i class="fas fa-circle-notch fa-spin"></i> Cargando...</div>';
-            if(licCont) licCont.innerHTML = '<div class="text-center py-10 opacity-50"><i class="fas fa-circle-notch fa-spin"></i> Cargando...</div>';
+            if(leadsCont) leadsCont.innerHTML = '<div class="text-center py-10 opacity-50"><i class="fas fa-circle-notch fa-spin"></i> Cargando datos...</div>';
+            if(licCont) licCont.innerHTML = '<div class="text-center py-10 opacity-50"><i class="fas fa-circle-notch fa-spin"></i> Cargando datos...</div>';
             
             if(unsubLeads) unsubLeads();
             if(unsubLicenses) unsubLicenses();
 
-            // Cargar Pedidos (Búsqueda en la colección correspondiente al appId)
-            const q1 = query(collection(db, 'artifacts', appId, 'public', 'data', 'krono_leads'));
-            unsubLeads = onSnapshot(q1, s => {
-                leads = s.docs.map(d => ({id:d.id, ...d.data()}));
-                leads.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
-                
-                const statLeads = document.getElementById('stat-leads');
-                const countLeads = document.getElementById('count-leads');
-                if(statLeads) statLeads.innerText = leads.length;
-                if(countLeads) countLeads.innerText = leads.length;
-                
-                renderLeads();
-            }, error => {
-                console.error("Error cargando leads:", error);
-                if(leadsCont) leadsCont.innerHTML = `<div class="text-red-400 p-5">Error: ${error.message}</div>`;
-            });
+            try {
+                // Cargar Leads
+                const q1 = query(collection(db, 'artifacts', appId, 'public', 'data', 'krono_leads'));
+                unsubLeads = onSnapshot(q1, s => {
+                    leads = s.docs.map(d => ({id:d.id, ...d.data()}));
+                    leads.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+                    
+                    document.getElementById('stat-leads').innerText = leads.length;
+                    renderLeads();
+                }, err => showDBError(err, leadsCont));
 
-            // Cargar Licencias
-            const q2 = query(collection(db, 'artifacts', appId, 'public', 'data', 'access_codes'));
-            unsubLicenses = onSnapshot(q2, s => {
-                licenses = s.docs.map(d => ({id:d.id, ...d.data()}));
+                // Cargar Licencias
+                const q2 = query(collection(db, 'artifacts', appId, 'public', 'data', 'access_codes'));
+                unsubLicenses = onSnapshot(q2, s => {
+                    licenses = s.docs.map(d => ({id:d.id, ...d.data()}));
+                    
+                    document.getElementById('stat-licenses').innerText = licenses.length;
+                    renderLicenses();
+                }, err => showDBError(err, licCont));
                 
-                const statLicenses = document.getElementById('stat-licenses');
-                const countLicenses = document.getElementById('count-licenses');
-                if(statLicenses) statLicenses.innerText = licenses.length;
-                if(countLicenses) countLicenses.innerText = licenses.length;
-                
-                renderLicenses();
-            }, error => {
-                console.error("Error cargando licencias:", error);
-                if(licCont) licCont.innerHTML = `<div class="text-red-400 p-5">Error: ${error.message}</div>`;
-            });
+            } catch (e) {
+                showDBError(e, leadsCont);
+            }
         }
 
-        // TABS INTERNOS
+        function showDBError(error, container) {
+            console.error(error);
+            if(container) container.innerHTML = `<div class="bg-red-900/30 border border-red-500 text-red-200 p-4 rounded-lg text-xs font-mono">
+                <p class="font-bold">ERROR DE PERMISOS:</p>
+                <p>${error.message}</p>
+                <p class="mt-2 text-slate-400">¿Has puesto las reglas universales en Firebase?</p>
+            </div>`;
+        }
+
         window.setInternalTab = (tab) => {
             const w = document.getElementById('view-work');
             const d = document.getElementById('view-data');
@@ -316,11 +309,9 @@
             }
         }
 
-        // ACCIONES
         window.addLead = async () => {
             const input = document.getElementById('input-email');
             const email = input ? input.value.trim().toLowerCase() : '';
-            
             if(!email) return alert("Escribe un correo.");
             try {
                 await addDoc(collection(db, 'artifacts', apps[currentAppIndex].id, 'public', 'data', 'krono_leads'), {
@@ -331,6 +322,7 @@
         };
 
         window.del = async (col, id, msg) => {
+            // Usamos confirm porque es parte del diseño original del usuario
             if(confirm(msg)) await deleteDoc(doc(db, 'artifacts', apps[currentAppIndex].id, 'public', 'data', col, id));
         };
 
@@ -354,18 +346,14 @@
              } catch(e) { alert(e.message); if(btn) btn.disabled=false; }
         };
 
-        // RENDERIZADO
         function renderLeads() {
             const container = document.getElementById('leads-container');
-            if(!container) return; // Protección
-
+            if(!container) return;
             const app = apps[currentAppIndex];
-
             if(leads.length === 0) { 
-                container.innerHTML = `<div class="text-center py-16 bg-slate-800/30 rounded-2xl border border-dashed border-slate-700 text-slate-500">No hay correos pendientes.</div>`; 
+                container.innerHTML = `<div class="text-center py-16 bg-slate-800/30 rounded-2xl border border-dashed border-slate-700 text-slate-500">No hay correos pendientes en ${app.name}.</div>`; 
                 return; 
             }
-
             container.innerHTML = leads.map(l => {
                 const isDone = l.status === 'done';
                 const actsDone = `
@@ -374,15 +362,13 @@
                             <span class="text-emerald-500 font-bold text-xs uppercase">Clave:</span>
                             <code class="text-white font-mono text-lg tracking-widest">${l.generatedCode}</code>
                          </div>
-                         <a href="mailto:${l.email}?subject=Licencia ${app.name}&body=Hola!%0D%0A%0D%0AAquí tienes tu clave de acceso para ${app.name}:%0D%0A%0D%0ACLAVE: ${l.generatedCode}%0D%0A%0D%0AGracias por tu compra!" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-bold text-xs shadow-lg transition-transform active:scale-95 w-full sm:w-auto text-center"><i class="fas fa-paper-plane mr-2"></i> ENVIAR AL CLIENTE</a>
+                         <a href="mailto:${l.email}?subject=Licencia ${app.name}&body=Hola!%0D%0A%0D%0AAquí tienes tu clave: ${l.generatedCode}" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-bold text-xs shadow-lg transition-transform active:scale-95 w-full sm:w-auto text-center"><i class="fas fa-paper-plane mr-2"></i> ENVIAR</a>
                     </div>`;
-
                 const actsPending = `
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                         <a href="mailto:${l.email}?subject=Pago ${app.name}&body=Hola,%0D%0A%0D%0APara obtener tu licencia de ${app.name}, por favor realiza un Bizum de ${app.price} al 686 16 60 07.%0D%0A%0D%0AResponde a este correo con el comprobante." target="_blank" class="bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-lg font-bold text-xs text-center border border-slate-600 transition-colors"><i class="fas fa-euro-sign text-yellow-400 mr-1"></i> 1. PEDIR PAGO (${app.price})</a>
-                         <button id="btn-act-${l.id}" onclick="act('${l.id}','${l.email}')" class="bg-${app.color}-600 hover:bg-${app.color}-500 text-white py-3 rounded-lg font-bold text-xs shadow-lg shadow-${app.color}-900/30 transition-colors"><i class="fas fa-bolt mr-1"></i> 2. GENERAR CLAVE</button>
+                         <a href="mailto:${l.email}?subject=Pago ${app.name}&body=Hola,%0D%0A%0D%0APrecio: ${app.price}." target="_blank" class="bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-lg font-bold text-xs text-center border border-slate-600 transition-colors"><i class="fas fa-euro-sign text-yellow-400 mr-1"></i> PEDIR PAGO (${app.price})</a>
+                         <button id="btn-act-${l.id}" onclick="act('${l.id}','${l.email}')" class="bg-${app.color}-600 hover:bg-${app.color}-500 text-white py-3 rounded-lg font-bold text-xs shadow-lg shadow-${app.color}-900/30 transition-colors"><i class="fas fa-bolt mr-1"></i> GENERAR CLAVE</button>
                     </div>`;
-
                 return `
                 <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm hover:border-slate-600 transition-all group">
                     <div class="flex justify-between items-start">
@@ -390,10 +376,10 @@
                             <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${isDone ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-slate-700 text-slate-400'}">${l.email.charAt(0).toUpperCase()}</div>
                             <div>
                                 <h3 class="font-bold text-white text-lg">${l.email}</h3>
-                                <div class="text-xs text-slate-500 flex items-center gap-2"><i class="far fa-clock"></i> ${new Date(l.createdAt).toLocaleDateString()} ${isDone ? '<span class="text-emerald-500 font-bold">• COMPLETADO</span>' : '<span class="text-yellow-500 font-bold">• PENDIENTE</span>'}</div>
+                                <div class="text-xs text-slate-500 flex items-center gap-2">${new Date(l.createdAt).toLocaleDateString()} ${isDone ? '<span class="text-emerald-500 font-bold">• COMPLETADO</span>' : '<span class="text-yellow-500 font-bold">• PENDIENTE</span>'}</div>
                             </div>
                         </div>
-                        <button onclick="del('krono_leads','${l.id}','¿Borrar nota?')" class="text-slate-600 hover:text-red-500 p-2 rounded-lg hover:bg-red-500/10 transition-colors"><i class="fas fa-trash"></i></button>
+                        <button onclick="del('krono_leads','${l.id}','¿Borrar?')" class="text-slate-600 hover:text-red-500 p-2"><i class="fas fa-trash"></i></button>
                     </div>
                     ${isDone ? actsDone : actsPending}
                 </div>`;
@@ -402,21 +388,15 @@
 
         function renderLicenses() {
              const container = document.getElementById('licenses-container');
-             if(!container) return; // Protección
-
+             if(!container) return;
              if(licenses.length === 0) { container.innerHTML = `<div class="text-center py-16 opacity-50"><i class="fas fa-database text-4xl text-slate-600 mb-3"></i><p>No hay licencias activas.</p></div>`; return; }
-
              container.innerHTML = licenses.map(l => `
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center hover:bg-slate-700/50 transition-colors group">
-                    <div>
-                        <div class="font-bold text-white flex items-center gap-3">${l.email} <span class="bg-emerald-500/10 text-emerald-500 text-[10px] px-2 py-0.5 rounded border border-emerald-500/20 font-bold">ACTIVO</span></div>
-                        <div class="flex items-center gap-2 mt-1"><code class="text-emerald-400 text-xs font-mono bg-slate-900 px-2 py-1 rounded border border-slate-600 tracking-wider">${l.code}</code></div>
-                    </div>
-                    <button onclick="del('access_codes','${l.id}','¡PELIGRO! ¿Borrar acceso?')" class="bg-red-500/10 text-red-500 px-3 py-2 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors flex items-center gap-2"><i class="fas fa-trash-alt"></i> BORRAR</button>
+                    <div class="font-bold text-white flex items-center gap-3">${l.email} <code class="text-emerald-400 text-xs font-mono bg-slate-900 px-2 py-1 rounded border border-slate-600 tracking-wider">${l.code}</code></div>
+                    <button onclick="del('access_codes','${l.id}','¡PELIGRO! ¿Borrar acceso?')" class="bg-red-500/10 text-red-500 px-3 py-2 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition-colors flex items-center gap-2"><i class="fas fa-trash-alt"></i></button>
                 </div>`).join('');
         }
 
-        // GLOBAL EXPORT
         window.switchApp = switchApp;
         window.setInternalTab = setInternalTab;
         window.addLead = addLead;
@@ -425,3 +405,5 @@
     </script>
 </body>
 </html>
+
+
