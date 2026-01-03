@@ -55,8 +55,12 @@
 
     <main class="max-w-5xl mx-auto p-4 md:p-8">
         
-        <!-- CAJA DE ERRORES (Visible solo si hay fallo) -->
-        <div id="error-box" class="hidden bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-xl mb-6 text-sm font-mono"></div>
+        <!-- CAJA DE ERRORES INTELIGENTE -->
+        <div id="error-box" class="hidden bg-red-900/50 border border-red-500 text-red-200 p-6 rounded-xl mb-6 shadow-xl">
+            <h3 class="text-lg font-bold text-red-100 mb-2"><i class="fas fa-exclamation-triangle mr-2"></i> ERROR DE CONFIGURACIÓN</h3>
+            <p id="error-msg" class="font-mono text-sm mb-4">...</p>
+            <div id="error-solution" class="bg-black/30 p-4 rounded text-sm text-slate-300"></div>
+        </div>
 
         <!-- PANEL DE CONTROL -->
         <div id="main-panel" class="fade-in space-y-8">
@@ -157,11 +161,11 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // --- CONFIGURACIÓN DE APPS CORREGIDA ---
+        // CONFIGURACIÓN DE APPS
         const apps = [
             { 
                 name: "KronoPersonal", 
-                id: "app_krono",  // <--- CORREGIDO: app_krono
+                id: "app_krono", 
                 price: "Consultar", 
                 color: "blue", 
                 colorHex: "#2563eb"
@@ -198,12 +202,28 @@
                 const statusDot = document.getElementById('connection-status');
                 if(statusDot) statusDot.innerHTML = '<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>';
                 
-                // Cargar App 0 (KronoPersonal/app_krono) por defecto
+                // Cargar App 0
                 switchApp(0);
             } catch (error) {
                 console.error("Error Auth:", error);
-                document.getElementById('error-box').classList.remove('hidden');
-                document.getElementById('error-box').innerText = "ERROR DE CONEXIÓN: " + error.message + ". Verifica que has actualizado las reglas de Firebase.";
+                const box = document.getElementById('error-box');
+                const msg = document.getElementById('error-msg');
+                const sol = document.getElementById('error-solution');
+                
+                box.classList.remove('hidden');
+                msg.innerText = error.message;
+
+                if (error.code === 'auth/configuration-not-found' || error.code === 'auth/admin-restricted-operation') {
+                    sol.innerHTML = `
+                    <p class="font-bold text-yellow-400 mb-2">SOLUCIÓN REQUERIDA EN FIREBASE:</p>
+                    <ol class="list-decimal pl-5 space-y-1">
+                        <li>Ve a la Consola de Firebase > <strong>Authentication</strong>.</li>
+                        <li>Pestaña <strong>Sign-in method</strong>.</li>
+                        <li>Activa el proveedor <strong>Anónimo</strong>.</li>
+                    </ol>`;
+                } else {
+                    sol.innerText = "Revisa tu conexión a internet y la configuración de Firebase.";
+                }
             }
         };
 
@@ -267,9 +287,8 @@
         function showDBError(error, container) {
             console.error(error);
             if(container) container.innerHTML = `<div class="bg-red-900/30 border border-red-500 text-red-200 p-4 rounded-lg text-xs font-mono">
-                <p class="font-bold">ERROR DE PERMISOS:</p>
+                <p class="font-bold">ERROR AL LEER DATOS:</p>
                 <p>${error.message}</p>
-                <p class="mt-2 text-slate-400">¿Has puesto las reglas universales en Firebase?</p>
             </div>`;
         }
 
@@ -322,7 +341,6 @@
         };
 
         window.del = async (col, id, msg) => {
-            // Usamos confirm porque es parte del diseño original del usuario
             if(confirm(msg)) await deleteDoc(doc(db, 'artifacts', apps[currentAppIndex].id, 'public', 'data', col, id));
         };
 
